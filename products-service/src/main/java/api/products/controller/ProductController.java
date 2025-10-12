@@ -4,6 +4,7 @@ package api.products.controller;
 import api.products.dto.ProductDto;
 import api.products.dto.ProductRequest;
 import api.products.dto.ProductResponse;
+import api.products.entity.Product;
 import api.products.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -30,8 +31,8 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductDto>> getProducts(@Valid @RequestParam String category) {
-        List<ProductDto> getProductsFromDb = productService.getProducts(category);
+    public ResponseEntity<List<Product>> getProducts(@Valid @RequestParam String category) {
+        List<Product> getProductsFromDb = productService.getProducts(category);
 
         return ResponseEntity.status(HttpStatus.OK).body(getProductsFromDb);
     }

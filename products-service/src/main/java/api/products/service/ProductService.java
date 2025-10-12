@@ -28,14 +28,18 @@ public class ProductService {
         @CachePut(value = PRODUCT_CACHE, key = "#productRequest.name")
         @Transactional
         public ProductResponse createProduct(ProductRequest productRequest) {
-                return productRepository.findByNameForUpdate(productRequest.getName())
-                        .map(existing -> updateExistingProduct(existing , productRequest))
-                        .orElseGet(() -> createNewProduct(productRequest));
+                String normalizedName = normalizeForComparison(productRequest.getName());
+
+                return productRepository.findAll().stream()
+                    .filter(p -> normalizeForComparison(p.getName()).equals(normalizedName))
+                    .findFirst()
+                    .map(existing -> updateExistingProduct(existing, productRequest))
+                    .orElseGet(() -> createNewProduct(productRequest));
         }
 
 
     @Cacheable(value = PRODUCT_CACHE , key = "#category")
-    public List<ProductDto> getProducts(String category) {
+    public List<Product> getProducts(String category) {
         if(!productRepository.existsByCategory(category)) {
             throw new CategoryNotFoundException("Category must exist to retrieve data!");
         }
@@ -49,8 +53,8 @@ public class ProductService {
 
         Product updated = Product.builder()
                 .id(existing.getId())
-                .category(existing.getCategory())
-                .name(existing.getName())
+                .category(formatForStorage(existing.getCategory()))
+                .name(formatForStorage(existing.getName()))
                 .price(request.getPrice())
                 .quantity(newQuantity)
                 .build();
@@ -59,11 +63,10 @@ public class ProductService {
         return mapToResponse(updated);
     }
 
-
     private ProductResponse createNewProduct(ProductRequest request) {
         Product product = Product.builder()
-                .category(request.getCategory())
-                .name(request.getName())
+                .category(formatForStorage(request.getCategory()))
+                .name(formatForStorage(request.getName()))
                 .price(request.getPrice())
                 .quantity(request.getQuantity())
                 .build();
@@ -72,10 +75,23 @@ public class ProductService {
         return mapToResponse(product);
     }
 
+    private String normalizeForComparison(String name) {
+            return name.toLowerCase()
+                    .replaceAll("\\s+" , "")
+                    .replaceAll("[^a-z0-9]", "");
+    }
+
+    private String formatForStorage(String name) {
+            return name.trim()
+                    .replaceAll("\\s+" , " ")
+                    .toLowerCase();
+    }
+
+
     private ProductResponse mapToResponse(Product product) {
         return new ProductResponse(
-                product.getCategory(),
-                product.getName(),
+                product.getCategory().toLowerCase(),
+                product.getName().toLowerCase(),
                 product.getPrice(),
                 product.getQuantity()
         );
