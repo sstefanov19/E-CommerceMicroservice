@@ -25,7 +25,7 @@ public class ProductService {
             this.productRepository = productRepository;
         }
 
-        @CachePut(value = PRODUCT_CACHE, key = "#productRequest.category")
+        @CachePut(value = PRODUCT_CACHE, key = "#productRequest.name")
         @Transactional
         public ProductResponse createProduct(ProductRequest productRequest) {
                 return productRepository.findByNameForUpdate(productRequest.getName())
