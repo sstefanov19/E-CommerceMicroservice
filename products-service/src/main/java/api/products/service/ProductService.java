@@ -28,7 +28,9 @@ public class ProductService {
         @CachePut(value = PRODUCT_CACHE, key = "#productRequest.name")
         @Transactional
         public ProductResponse createProduct(ProductRequest productRequest) {
-                return productRepository.findByNameForUpdate(productRequest.getName())
+                String normalizedName = normalizeForComparison(productRequest.getName());
+
+                return productRepository.findByNameForUpdate(normalizedName)
                         .map(existing -> updateExistingProduct(existing , productRequest))
                         .orElseGet(() -> createNewProduct(productRequest));
         }
@@ -44,7 +46,7 @@ public class ProductService {
     }
 
 
-    private ProductResponse updateExistingProduct(Product existing , ProductRequest request) {
+    private ProductResponse updateExistingProduct(ProductDto existing , ProductRequest request) {
         Integer newQuantity = existing.getQuantity() + request.getQuantity();
 
         Product updated = Product.builder()
@@ -59,7 +61,6 @@ public class ProductService {
         return mapToResponse(updated);
     }
 
-
     private ProductResponse createNewProduct(ProductRequest request) {
         Product product = Product.builder()
                 .category(request.getCategory())
@@ -72,10 +73,17 @@ public class ProductService {
         return mapToResponse(product);
     }
 
+    private String normalizeForComparison(String name) {
+            return name.toLowerCase()
+                    .replaceAll("\\s+" , "")
+                    .replaceAll("[^a-z0-9]", "");
+    }
+
+
     private ProductResponse mapToResponse(Product product) {
         return new ProductResponse(
-                product.getCategory(),
-                product.getName(),
+                product.getCategory().toLowerCase(),
+                product.getName().toLowerCase(),
                 product.getPrice(),
                 product.getQuantity()
         );
