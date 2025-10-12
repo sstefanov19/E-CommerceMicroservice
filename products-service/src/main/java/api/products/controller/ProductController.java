@@ -31,8 +31,8 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Product>> getProducts(@Valid @RequestParam String category) {
-        List<Product> getProductsFromDb = productService.getProducts(category);
+    public ResponseEntity<List<ProductDto>> getProducts(@Valid @RequestParam String category) {
+        List<ProductDto> getProductsFromDb = productService.getProducts(category);
 
         return ResponseEntity.status(HttpStatus.OK).body(getProductsFromDb);
     }

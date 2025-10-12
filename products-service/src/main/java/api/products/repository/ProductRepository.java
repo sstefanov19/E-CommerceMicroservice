@@ -15,14 +15,14 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT p FROM Product p WHERE p.name = :name")
-    Optional<Product> findByNameForUpdate(@Param("name") String name);
+    @Query("SELECT p FROM Product p WHERE LOWER(REPLACE(p.name, ' ', '')) = LOWER(REPLACE(:name, ' ', ''))")
+    Optional<ProductDto> findByNameForUpdate(@Param("name") String name);
 
     Boolean existsByName(String name);
 
     Boolean existsByCategory(String category);
 
-    Product getProductByName(String name);
+    ProductDto getProductByName(String name);
 
-    List<Product> getProductsByCategory(String category);
+    List<ProductDto> getProductsByCategory(String category);
 }
