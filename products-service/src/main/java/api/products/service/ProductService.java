@@ -84,7 +84,7 @@ public class ProductService {
     }
 
     private ProductDto mapToDto(Product product) {
-        return new ProductDto(product.getId(), product.getName(), product.getCategory(), product.getPrice(), product.getQuantity());
+        return new ProductDto(product.getId(), product.getCategory(), product.getName(), product.getPrice(), product.getQuantity());
     }
 
     private ProductResponse mapToResponse(Product product) {
