@@ -1,6 +1,5 @@
 package api.products.repository;
 
-import api.products.dto.ProductDto;
 import api.products.entity.Product;
 
 import jakarta.persistence.LockModeType;
@@ -25,7 +24,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Boolean existsByCategory(String category);
 
-    ProductDto getProductByName(String name);
+    Product getProductByName(String name);
 
-    List<ProductDto> getProductsByCategory(String category);
+    List<Product> getProductsByCategory(String category);
 }

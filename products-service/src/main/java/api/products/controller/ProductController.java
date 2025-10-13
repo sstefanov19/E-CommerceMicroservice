@@ -4,7 +4,6 @@ package api.products.controller;
 import api.products.dto.ProductDto;
 import api.products.dto.ProductRequest;
 import api.products.dto.ProductResponse;
-import api.products.entity.Product;
 import api.products.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
