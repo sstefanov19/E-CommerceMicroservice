@@ -42,11 +42,15 @@ public class ProductService {
             throw new CategoryNotFoundException("Category must exist to retrieve data!");
         }
 
-        return productRepository.getProductsByCategory(category);
+        return productRepository.getProductsByCategory(category)
+                .stream()
+                .map(this::mapToDto)
+                .toList();
     }
 
 
-    private ProductResponse updateExistingProduct(ProductDto existing , ProductRequest request) {
+
+    private ProductResponse updateExistingProduct(Product existing , ProductRequest request) {
         Integer newQuantity = existing.getQuantity() + request.getQuantity();
 
         Product updated = Product.builder()
@@ -79,6 +83,9 @@ public class ProductService {
                     .replaceAll("[^a-z0-9]", "");
     }
 
+    private ProductDto mapToDto(Product product) {
+        return new ProductDto(product.getId(), product.getCategory(), product.getName(), product.getPrice(), product.getQuantity());
+    }
 
     private ProductResponse mapToResponse(Product product) {
         return new ProductResponse(
