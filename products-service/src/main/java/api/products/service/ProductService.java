@@ -25,7 +25,7 @@ public class ProductService {
             this.productRepository = productRepository;
         }
 
-        @CachePut(value = PRODUCT_CACHE, key = "#productRequest.name")
+        @CachePut(value = PRODUCT_CACHE, key = "#result.category()")
         @Transactional
         public ProductResponse createProduct(ProductRequest productRequest) {
                 String normalizedName = normalizeForComparison(productRequest.getName());
