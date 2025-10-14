@@ -37,14 +37,13 @@ public class ProductService {
 
 
     @Cacheable(value = PRODUCT_CACHE , key = "#category")
-    public List<ProductDto> getProducts(String category) {
+    public List<ProductResponse> getProducts(String category) {
         if(!productRepository.existsByCategory(category)) {
             throw new CategoryNotFoundException("Category must exist to retrieve data!");
         }
 
-        return productRepository.getProductsByCategory(category)
-                .stream()
-                .map(this::mapToDto)
+        return productRepository.getProductsByCategory(category).stream()
+                .map(this::mapToResponse)
                 .toList();
     }
 
