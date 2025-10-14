@@ -1,7 +1,6 @@
 package api.products.controller;
 
 
-import api.products.dto.ProductDto;
 import api.products.dto.ProductRequest;
 import api.products.dto.ProductResponse;
 import api.products.service.ProductService;
@@ -30,8 +29,8 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductDto>> getProducts(@Valid @RequestParam String category) {
-        List<ProductDto> getProductsFromDb = productService.getProducts(category);
+    public ResponseEntity<List<ProductResponse>> getProducts(@Valid @RequestParam String category) {
+        List<ProductResponse> getProductsFromDb = productService.getProducts(category);
 
         return ResponseEntity.status(HttpStatus.OK).body(getProductsFromDb);
     }

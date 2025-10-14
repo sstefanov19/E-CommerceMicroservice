@@ -1,6 +1,7 @@
 package api.products.dto;
 
-import java.math.BigDecimal;
+import lombok.Builder;
 
-public record ProductResponse(String category , String name, BigDecimal price, Integer quantity) {
-}
+import java.math.BigDecimal;
+@Builder
+public record ProductResponse(String category , String name, BigDecimal price, Integer quantity) { }

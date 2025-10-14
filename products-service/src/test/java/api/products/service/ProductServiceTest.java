@@ -1,6 +1,5 @@
 package api.products.service;
 
-import api.products.dto.ProductDto;
 import api.products.dto.ProductRequest;
 import api.products.dto.ProductResponse;
 import api.products.entity.Product;
@@ -16,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,18 +56,22 @@ public class ProductServiceTest {
 
         String category = "Electronics";
         Product product1 = Product.builder().category("Electronics").name("Nintendo Switch").price(new BigDecimal(400)).quantity(3).build();
-        Product product2 = Product.builder().category("Electronics").name("Playstation 5").price(new BigDecimal(450)).quantity(2).build();
 
 
-        List<Product> products = Arrays.asList(product1 , product2);
+        List<Product> products = Collections.singletonList(product1);
 
         when(productRepository.existsByCategory(category)).thenReturn(true);
         when(productRepository.getProductsByCategory(category)).thenReturn(products);
 
-        List<ProductDto> result = productService.getProducts(category);
+        List<ProductResponse> result = productService.getProducts(category);
 
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(2 , result.size());
+        Assertions.assertEquals(1 , result.size());
+
+        Assertions.assertEquals("Electronics" , result.getFirst().category());
+        Assertions.assertEquals("Nintendo Switch" , result.getFirst().name());
+        Assertions.assertEquals(new BigDecimal(400) , result.getFirst().price());
+        Assertions.assertEquals(3 , result.getFirst().quantity());
 
 
     }
