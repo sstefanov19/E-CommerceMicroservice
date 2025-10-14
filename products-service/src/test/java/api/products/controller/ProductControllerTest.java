@@ -1,6 +1,5 @@
 package api.products.controller;
 
-import api.products.dto.ProductDto;
 import api.products.dto.ProductRequest;
 import api.products.dto.ProductResponse;
 
