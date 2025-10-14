@@ -14,10 +14,7 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query(
-        value = "SELECT * FROM product p WHERE LOWER(REGEXP_REPLACE(p.name, '[^a-zA-Z0-9]', '', 'g')) = LOWER(REGEXP_REPLACE(:name, '[^a-zA-Z0-9]', '', 'g'))",
-        nativeQuery = true
-    )
+    @Query("SELECT p FROM Product p WHERE LOWER(REPLACE(REPLACE(p.name, ' ', ''), '-', '')) = LOWER(REPLACE(REPLACE(:name, ' ', ''), '-', ''))")
     Optional<Product> findByNameForUpdate(@Param("name") String name);
 
     Boolean existsByName(String name);
