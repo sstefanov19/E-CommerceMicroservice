@@ -16,6 +16,8 @@ public class ApiGatewayConfiguration {
                         .uri("lb://products"))
                 .route(p -> p.path("/auth/**")
                         .uri("lb://auth"))
+                .route(p -> p.path("/orders/**")
+                        .uri("lb://orders"))
                 .build();
     }
 }
