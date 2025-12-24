@@ -7,6 +7,7 @@ import api.products.entity.Product;
 import api.products.exception.CategoryNotFoundException;
 import api.products.repository.ProductRepository;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.NotFoundException;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -17,28 +18,40 @@ import java.util.List;
 public class ProductService {
 
 
-        private final ProductRepository productRepository;
-        public static final String PRODUCT_CACHE = "products";
+    private final ProductRepository productRepository;
+    public static final String PRODUCT_CACHE = "products";
 
 
-        public ProductService(ProductRepository productRepository) {
-            this.productRepository = productRepository;
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
+
+    @CachePut(value = PRODUCT_CACHE, key = "#result.category() + ':' + #result.name()")
+    @Transactional
+    public ProductResponse createProduct(ProductRequest productRequest) {
+        String normalizedName = normalizeForComparison(productRequest.getName());
+
+        return productRepository.findByNameForUpdate(normalizedName)
+                .map(existing -> updateExistingProduct(existing, productRequest))
+                .orElseGet(() -> createNewProduct(productRequest));
+    }
+
+    public ProductResponse getProductByName(String name) {
+        Boolean exists = productRepository.existsByName(name);
+
+        if(!exists) {
+            throw new RuntimeException("Cannot return item that doesnt exist!");
         }
 
-        @CachePut(value = PRODUCT_CACHE, key = "#result.category() + ':' + #result.name()")
-        @Transactional
-        public ProductResponse createProduct(ProductRequest productRequest) {
-                String normalizedName = normalizeForComparison(productRequest.getName());
+        Product productByName = productRepository.getProductByName(name);
 
-                return productRepository.findByNameForUpdate(normalizedName)
-                        .map(existing -> updateExistingProduct(existing , productRequest))
-                        .orElseGet(() -> createNewProduct(productRequest));
-        }
+        return mapToResponse(productByName);
+    }
 
 
-    @Cacheable(value = PRODUCT_CACHE , key = "#category")
+    @Cacheable(value = PRODUCT_CACHE, key = "#category")
     public List<ProductResponse> getProducts(String category) {
-        if(!productRepository.existsByCategory(category)) {
+        if (!productRepository.existsByCategory(category)) {
             throw new CategoryNotFoundException("Category must exist to retrieve data!");
         }
 
@@ -47,9 +60,14 @@ public class ProductService {
                 .toList();
     }
 
+    public ProductResponse getProductById(Long id) {
+        Product productById = productRepository.findById(id)
+                .orElseThrow(NotFoundException::new);
 
+        return mapToResponse(productById);
+    }
 
-    private ProductResponse updateExistingProduct(Product existing , ProductRequest request) {
+    private ProductResponse updateExistingProduct(Product existing, ProductRequest request) {
         Integer newQuantity = existing.getQuantity() + request.getQuantity();
 
         Product updated = Product.builder()
@@ -77,9 +95,9 @@ public class ProductService {
     }
 
     private String normalizeForComparison(String name) {
-            return name.toLowerCase()
-                    .replaceAll("\\s+" , "")
-                    .replaceAll("[^a-z0-9]", "");
+        return name.toLowerCase()
+                .replaceAll("\\s+", "")
+                .replaceAll("[^a-z0-9]", "");
     }
 
     private ProductDto mapToDto(Product product) {

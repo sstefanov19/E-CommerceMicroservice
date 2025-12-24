@@ -3,6 +3,7 @@ package api.products.controller;
 
 import api.products.dto.ProductRequest;
 import api.products.dto.ProductResponse;
+import api.products.entity.Product;
 import api.products.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,28 @@ public class ProductController {
         ProductResponse response = productService.createProduct(productRequest);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+//    @GetMapping("/{id}")
+//    public ResponseEntity<ProductResponse> getProductById(@Valid @PathVariable Long id) {
+//        ProductResponse product = productService.getProductById(id);
+//
+//        return ResponseEntity.status(HttpStatus.OK).body(product);
+//    }
+
+    @GetMapping("/{param}")
+    public ResponseEntity<ProductResponse> getProduct(@PathVariable String param) {
+        try {
+            Long id = Long.parseLong(param);
+
+            ProductResponse productById = productService.getProductById(id);
+
+            return ResponseEntity.status(HttpStatus.OK).body(productById);
+        }catch(NumberFormatException e) {
+        ProductResponse productByName = productService.getProductByName(param);
+
+        return ResponseEntity.status(HttpStatus.OK).body(productByName);
+        }
     }
 
     @GetMapping
