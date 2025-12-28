@@ -1,0 +1,22 @@
+services:
+  eureka-server:
+    build: ./eureka-server # Path to your Eureka project
+    ports:
+      - "8761:8761"
+
+  api-gateway:
+    build: ./api-gateway   # Path to your Gateway project
+    ports:
+      - "8765:8765"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_APPLICATION_NAME=api-gateway
+    depends_on:
+      - eureka-server
+
+  order-service:
+    build: ./order-service
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server

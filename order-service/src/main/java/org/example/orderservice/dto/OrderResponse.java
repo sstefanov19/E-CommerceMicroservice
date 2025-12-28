@@ -1,15 +1,12 @@
-package org.example.orderservice.entity;
+package org.example.orderservice.dto;
 
-import jakarta.persistence.*;
+import lombok.Builder;
+import org.example.orderservice.entity.OrderEnum;
 
 import java.math.BigDecimal;
 
-@Entity
-@Table(name= "orders")
-public class Orders {
-
-    @Id
-    @GeneratedValue(strategy =  GenerationType.SEQUENCE)
+@Builder
+public class OrderResponse {
     private Long id;
 
     private Long user_id;

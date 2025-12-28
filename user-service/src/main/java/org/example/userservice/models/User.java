@@ -3,6 +3,8 @@ package org.example.userservice.models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,4 +19,5 @@ public class User {
     private String email;
     private String username;
     private String password;
+    private BigDecimal balance;
 }
