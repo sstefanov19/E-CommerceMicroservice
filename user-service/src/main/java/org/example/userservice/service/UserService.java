@@ -14,6 +14,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @AllArgsConstructor
 @Service
 public class UserService {
@@ -38,6 +40,7 @@ public class UserService {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .balance(request.getBalance())
                 .build();
 
         userRepository.save(user);
@@ -53,6 +56,17 @@ public class UserService {
                 );
         SecurityContextHolder.getContext().setAuthentication(authentication);
         return jwtService.generateTokenPair(authentication);
+    }
+
+    public BigDecimal getUserBalance() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username);
+        return user != null ? user.getBalance() : new BigDecimal("0.0");
+    }
+
+    public Boolean validateToken(String token) {
+        return jwtService.isValidToken(token);
     }
 
 }

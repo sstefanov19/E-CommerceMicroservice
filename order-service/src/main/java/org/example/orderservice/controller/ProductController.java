@@ -1,8 +1,6 @@
 package org.example.orderservice.controller;
 
-import jakarta.validation.Valid;
 import org.example.orderservice.dto.ProductResponse;
-import org.example.orderservice.service.OrderService;
 import org.example.orderservice.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

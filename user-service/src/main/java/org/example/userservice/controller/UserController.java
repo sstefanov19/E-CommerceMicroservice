@@ -8,10 +8,9 @@ import org.example.userservice.dto.TokenPair;
 import org.example.userservice.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
 
 @AllArgsConstructor
 @RestController
@@ -32,6 +31,19 @@ public class UserController {
         TokenPair tokenPair = userService.loginUser(request);
 
         return ResponseEntity.status(HttpStatus.OK).body(tokenPair);
+    }
+
+    @GetMapping("/validate")
+    public boolean validateToken(@RequestParam("token") String token) {
+        return userService.validateToken(token);
+    }
+
+    @GetMapping("/balance")
+    public ResponseEntity<BigDecimal> getUserBalance() {
+
+        BigDecimal balance = userService.getUserBalance();
+
+        return ResponseEntity.status(HttpStatus.OK).body(balance);
     }
 
 }
