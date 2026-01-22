@@ -38,22 +38,19 @@ public class OrderService {
         // 1. Synchronous REST call to validate product availability
         ProductResponse product = productService.getProductByName(request.item_name());
 
-        if (product.getQuantity() < request.quantity()) {
+        if (product.quantity() < request.quantity()) {
             throw new QuantityNotEnough("We dont have enough quantity for the item");
         }
 
-        BigDecimal totalPrice = new BigDecimal(request.quantity()).multiply(product.getPrice());
+        BigDecimal totalPrice = new BigDecimal(request.quantity()).multiply(product.price());
 
-        // 2. Synchronous REST call to get userId
         Long userId = userService.getUserId();
 
-        // 3. Synchronous REST call to validate balance (read-only check)
         BigDecimal userBalance = userService.getUserBalance();
         if (userBalance.compareTo(totalPrice) < 0) {
             throw new BalanceNotEnough("User balance is not enough make sure you have enough balance");
         }
 
-        // 4. Create and save order
         Orders dbOrder = Orders.builder()
                 .itemName(request.item_name())
                 .userId(userId)
@@ -83,7 +80,7 @@ public class OrderService {
 
         orderEventProducer.publishOrderCreatedEvent(event);
 
-        // 6. Return response
+
         return OrderResponse.builder()
                 .id(dbOrder.getId())
                 .userId(userId)
