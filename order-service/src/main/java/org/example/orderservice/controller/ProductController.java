@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("products/")
+@RequestMapping("/orders/products")
 public class ProductController {
 
     private final ProductService productService;
@@ -20,7 +20,7 @@ public class ProductController {
     }
 
 
-    @GetMapping("{param}")
+    @GetMapping("/{param}")
     public ResponseEntity<ProductResponse> getProduct(@PathVariable String param) {
         ProductResponse response;
 

@@ -1,23 +1,14 @@
 package org.example.orderservice.dto;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
 
-@Builder
-@Getter
-@Setter
-public class OrderRequest {
-
+public record OrderRequest (
     @NotBlank(message = "Category of product cannot be blank!")
-    private String category;
-
-    @NotBlank(message = "Category of product cannot be blank!")
-    private String item_name;
-
-    @NotBlank(message = "Category of product cannot be blank!")
-    private Integer quantity;
-
-
-}
+     String category,
+    @NotBlank(message = "Item name cannot be blank!")
+     String item_name,
+    @NotNull(message = "Quantity cannot be null!")
+    @Min(value = 1, message = "Quantity must be at least 1")
+     Integer quantity) {}

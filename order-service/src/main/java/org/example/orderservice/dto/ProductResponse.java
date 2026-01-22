@@ -9,8 +9,8 @@ import java.math.BigDecimal;
 @Setter
 public class ProductResponse {
 
-    String category;
-    String name;
-    BigDecimal price;
-    Integer quantity;
+    private String category;
+    private String name;
+    private BigDecimal price;
+    private Integer quantity;
 }

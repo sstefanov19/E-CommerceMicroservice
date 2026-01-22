@@ -68,8 +68,8 @@ public class ProductServiceTest {
         Assertions.assertNotNull(result);
         Assertions.assertEquals(1 , result.size());
 
-        Assertions.assertEquals("Electronics" , result.getFirst().category());
-        Assertions.assertEquals("Nintendo Switch" , result.getFirst().name());
+        Assertions.assertEquals("electronics" , result.getFirst().category());
+        Assertions.assertEquals("nintendo switch" , result.getFirst().name());
         Assertions.assertEquals(new BigDecimal(400) , result.getFirst().price());
         Assertions.assertEquals(3 , result.getFirst().quantity());
 
@@ -86,6 +86,30 @@ public class ProductServiceTest {
         Assertions.assertThrows(CategoryNotFoundException.class , () -> {
             productService.getProducts(category);
         });
+    }
+
+    @Test
+    public void ProductService_RestockProduct_ShouldSucceed() {
+
+        Long productId = 1L;
+        int quantityToAdd = 4;
+        int expectedQuantity = 10;
+
+        Product product1 = Product.builder().category("clothes").name("jordan hoodie").price(new BigDecimal(60)).quantity(6).build();
+
+        when(productRepository.getProductById(productId)).thenReturn(product1);
+
+        when(productRepository.save(Mockito.any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        ProductResponse response = productService.restockProduct(quantityToAdd , productId);
+
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(expectedQuantity , response.quantity());
+
+        Mockito.verify(productRepository).save(product1);
+
+
+
     }
 
 }

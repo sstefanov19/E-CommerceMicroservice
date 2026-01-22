@@ -9,6 +9,7 @@ import lombok.experimental.Tolerate;
 import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.Token;
 import org.example.userservice.dto.TokenPair;
+import org.example.userservice.models.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -60,11 +61,19 @@ public class JwtService {
     }
 
     public String generateAccessToken(Authentication authentication) {
-        return generateToken(authentication ,jwtExpirationMs ,new HashMap<>());
+        Map<String, Object> claims = new HashMap<>();
+
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof User user) {
+            claims.put("userId", user.getId());
+        }
+
+        return generateToken(authentication, jwtExpirationMs, claims);
     }
 
     public String generateRefreshToken(Authentication authentication) {
-        Map<String , String> claims = new HashMap<>();
+        Map<String , Object> claims = new HashMap<>();
         claims.put("tokenType" , "refresh");
 
         return generateToken(authentication , refreshTokenExpirationMs, claims);
@@ -85,7 +94,7 @@ public class JwtService {
         return null;
     }
 
-    private String generateToken(Authentication authentication , long expirationMs, Map<String , String> claims) {
+    private String generateToken(Authentication authentication , long expirationMs, Map<String , Object> claims) {
         UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationMs);
@@ -94,8 +103,8 @@ public class JwtService {
                 .header()
                 .add("typ", "JWT")
                 .and()
-                .subject(userPrincipal.getUsername())
                 .claims(claims)
+                .subject(userPrincipal.getUsername())
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getSignInKey())

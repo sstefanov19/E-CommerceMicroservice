@@ -2,27 +2,25 @@ package api.apigateway;
 
 
 import api.apigateway.util.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+
+import java.util.Objects;
 
 
 @Component
 public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAuthenticationFilter.Config> {
 
+    private final  JwtUtil jwtUtil;
 
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    public JwtAuthenticationFilter(WebClient.Builder webClientBuilder) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil) {
         super(Config.class);
+        this.jwtUtil = jwtUtil;
     }
 
     public static class Config {
@@ -32,28 +30,34 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
     public GatewayFilter apply(Config config) {
         return ((exchange, chain) -> {
 
-            // 1 Check for Authroization header
             if (!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
-                throw new RuntimeException("Missing authorization header");
+                return onError(exchange, HttpStatus.UNAUTHORIZED);
             }
 
-            // 2. Extract Token
-            String authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
+            String authHeader = Objects.requireNonNull(exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION)).getFirst();
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 authHeader = authHeader.substring(7);
             }
 
-            // 3. Validate
+            if(authHeader == null || authHeader.trim().isEmpty()) {
+                return onError(exchange , HttpStatus.UNAUTHORIZED);
+            }
+
             try {
                 jwtUtil.validateToken(authHeader);
             } catch (Exception e) {
                 System.out.println("Invalid access: " + e.getMessage());
-                throw new RuntimeException("Unauthorized access to application");
+                return onError(exchange, HttpStatus.UNAUTHORIZED);
             }
 
             return chain.filter(exchange);
 
         });
+    }
+
+    private Mono<Void> onError(ServerWebExchange exchange, HttpStatus httpStatus) {
+        exchange.getResponse().setStatusCode(httpStatus);
+        return exchange.getResponse().setComplete();
     }
 
 }

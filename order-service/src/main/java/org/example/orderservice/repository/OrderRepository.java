@@ -1,6 +1,10 @@
 package org.example.orderservice.repository;
 
-public interface OrderRepository {
+import org.example.orderservice.entity.Orders;
+import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
+public interface OrderRepository extends JpaRepository<Orders, Integer> {
 
 }

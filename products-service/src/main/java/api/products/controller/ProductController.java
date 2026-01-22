@@ -57,4 +57,11 @@ public class ProductController {
 
         return ResponseEntity.status(HttpStatus.OK).body(getProductsFromDb);
     }
+
+    @PutMapping
+    public ResponseEntity<ProductResponse> reduceStock(Integer quantity , Long id) {
+        ProductResponse updatedProduct = productService.reduceStock(quantity , id);
+
+        return ResponseEntity.status(HttpStatus.OK).body(updatedProduct);
+    }
 }

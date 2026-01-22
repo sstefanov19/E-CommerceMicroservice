@@ -2,6 +2,7 @@ package org.example.userservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.example.userservice.dto.BalanceUpdateRequest;
 import org.example.userservice.dto.LoginRequest;
 import org.example.userservice.dto.RegisterRequest;
 import org.example.userservice.dto.TokenPair;
@@ -34,8 +35,8 @@ public class UserController {
     }
 
     @GetMapping("/validate")
-    public boolean validateToken(@RequestParam("token") String token) {
-        return userService.validateToken(token);
+    public Long validateToken() {
+        return userService.getUserId();
     }
 
     @GetMapping("/balance")
@@ -46,4 +47,8 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(balance);
     }
 
+    @PostMapping("/balance/update")
+    public void updateUserBalance(@RequestBody BalanceUpdateRequest request) {
+        userService.updateUserBalance(request);
+    }
 }

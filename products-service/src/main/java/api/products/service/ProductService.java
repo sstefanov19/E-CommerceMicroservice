@@ -12,6 +12,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -29,10 +30,10 @@ public class ProductService {
     @CachePut(value = PRODUCT_CACHE, key = "#result.category() + ':' + #result.name()")
     @Transactional
     public ProductResponse createProduct(ProductRequest productRequest) {
-        String normalizedName = normalizeForComparison(productRequest.getName());
+        String normalizedName = normalizeForComparison(productRequest.name());
 
         return productRepository.findByNameForUpdate(normalizedName)
-                .map(existing -> updateExistingProduct(existing, productRequest))
+                .map(existing -> restockProduct(productRequest.quantity(), existing.getId()))
                 .orElseGet(() -> createNewProduct(productRequest));
     }
 
@@ -67,27 +68,38 @@ public class ProductService {
         return mapToResponse(productById);
     }
 
-    private ProductResponse updateExistingProduct(Product existing, ProductRequest request) {
-        Integer newQuantity = existing.getQuantity() + request.getQuantity();
+    @Transactional
+    public ProductResponse reduceStock(Integer orderedQuantity , Long id) {
 
-        Product updated = Product.builder()
-                .id(existing.getId())
-                .category(existing.getCategory())
-                .name(existing.getName())
-                .price(request.getPrice())
-                .quantity(newQuantity)
-                .build();
+        Product existing = productRepository.getProductById(id);
 
-        productRepository.save(updated);
-        return mapToResponse(updated);
+        Integer newQuantity = existing.getQuantity() - orderedQuantity;
+
+        existing.setQuantity(newQuantity);
+
+        productRepository.save(existing);
+        return mapToResponse(existing);
+    }
+
+    @Transactional
+    protected ProductResponse restockProduct(Integer orderedQuantity , Long id) {
+
+        Product existing = productRepository.getProductById(id);
+
+        Integer newQuantity = existing.getQuantity() + orderedQuantity;
+
+        existing.setQuantity(newQuantity);
+
+        productRepository.save(existing);
+        return mapToResponse(existing);
     }
 
     private ProductResponse createNewProduct(ProductRequest request) {
         Product product = Product.builder()
-                .category(request.getCategory())
-                .name(request.getName())
-                .price(request.getPrice())
-                .quantity(request.getQuantity())
+                .category(request.category())
+                .name(request.name())
+                .price(request.price())
+                .quantity(request.quantity())
                 .build();
 
         productRepository.save(product);
@@ -98,10 +110,6 @@ public class ProductService {
         return name.toLowerCase()
                 .replaceAll("\\s+", "")
                 .replaceAll("[^a-z0-9]", "");
-    }
-
-    private ProductDto mapToDto(Product product) {
-        return new ProductDto(product.getId(), product.getCategory(), product.getName(), product.getPrice(), product.getQuantity());
     }
 
     private ProductResponse mapToResponse(Product product) {

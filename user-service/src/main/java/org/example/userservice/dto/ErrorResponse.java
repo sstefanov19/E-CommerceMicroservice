@@ -1,4 +1,4 @@
-package org.example.orderservice.dto;
+package org.example.userservice.dto;
 
 import java.time.LocalDateTime;
 

@@ -16,15 +16,16 @@ public class ApiGatewayConfiguration {
     public RouteLocator gatewayConfiguration(RouteLocatorBuilder builder) {
         return builder.routes()
                 .route(p -> p.path("/products/**")
-                        // Apply the filter here
                         .filters(f -> f.filter(filter.apply(new JwtAuthenticationFilter.Config())))
-                        .uri("lb://products"))
+                        .uri("lb://PRODUCTS"))
                 .route(p -> p.path("/orders/**")
-                        // Apply the filter here
                         .filters(f -> f.filter(filter.apply(new JwtAuthenticationFilter.Config())))
-                        .uri("lb://orders"))
+                        .uri("lb://ORDERS"))
+                .route(p -> p.path("/auth/balance")
+                        .filters(f -> f.filter(filter.apply(new JwtAuthenticationFilter.Config())))
+                        .uri("lb://AUTH"))
                 .route(p -> p.path("/auth/**")
-                        .uri("lb://auth"))
+                        .uri("lb://AUTH"))
                 .build();
     }
 }

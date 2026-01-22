@@ -2,6 +2,7 @@ package org.example.userservice.service;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.example.userservice.dto.BalanceUpdateRequest;
 import org.example.userservice.dto.LoginRequest;
 import org.example.userservice.dto.TokenPair;
 import org.example.userservice.dto.RegisterRequest;
@@ -63,6 +64,24 @@ public class UserService {
         String username = authentication.getName();
         User user = userRepository.findByUsername(username);
         return user != null ? user.getBalance() : new BigDecimal("0.0");
+    }
+
+    @Transactional
+    public void updateUserBalance(BalanceUpdateRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username);
+
+        user.setBalance(user.getBalance().subtract(request.getCost()));
+
+        userRepository.save(user);
+    }
+
+    public Long getUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username);
+        return user.getId();
     }
 
     public Boolean validateToken(String token) {
